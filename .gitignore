@@ -1,0 +1,31 @@
+# Goland/JetBrains
+.idea
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.o
+*.a
+*.so
+*.dylib
+
+# Mac
+.DS_Store
+
+# Backup files
+*~*
+
+# Folders
+_obj
+_test
+
+# Editor files
+.idea/
+*.iml
+*.swp
+
+# Environment credentials
+.env
+credentials.json
+token.json
