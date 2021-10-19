@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Fiiii/WT/app/services/handlers"
 	"net/http"
 	"os"
 )
@@ -13,9 +14,14 @@ func main() {
 }
 
 func run() error {
+
+	// Api-calls mux
+	apiMux := handlers.APIMux()
+
 	// Construct a server to service the requests against the mux.
 	httpServer := http.Server{
 		Addr: "localhost:3000",
+		Handler: apiMux,
 	}
 
 	// Channel for listening errors from http server
