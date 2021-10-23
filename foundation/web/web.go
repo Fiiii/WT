@@ -20,8 +20,12 @@ type App struct {
 }
 
 // NewApp created new application instance.
-func NewApp() *App {
-	return &App{}
+func NewApp(shutdown chan os.Signal) *App {
+	mux := httptreemux.NewContextMux()
+	return &App{
+		shutdown: shutdown,
+		mux:      mux,
+	}
 }
 
 // SignalShutdown is used to gracefully shutdown the app when an integrity

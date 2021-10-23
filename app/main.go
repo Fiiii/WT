@@ -9,7 +9,9 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 	"time"
 )
 
@@ -60,9 +62,6 @@ func run(log *zap.SugaredLogger) error {
 		},
 	}
 
-	// Api-calls mux
-	apiMux := handlers.APIMux()
-
 	// =========================================================================
 	// Start Debug Service
 
@@ -81,6 +80,24 @@ func run(log *zap.SugaredLogger) error {
 	//		log.Errorw("shutdown", "status", "debug router closed", "host", cfg.Web.DebugHost, "ERROR", err)
 	//	}
 	//}()
+
+	// =========================================================================
+	// Start API Service
+
+	log.Infow("startup", "status", "initializing API support")
+
+	// Make a channel to listen for an interrupt or terminate signal from the OS.
+	// Use a buffered channel because the signal package requires it.
+	shutdown := make(chan os.Signal, 1)
+
+	// Signal to relay incoming signals
+	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+
+	apiMuxConf := handlers.APIMuxConfig{
+		Shutdown: shutdown,
+	}
+
+	apiMux := handlers.APIMux(apiMuxConf)
 
 	// Construct a server to service the requests against the mux.
 	httpServer := http.Server{
