@@ -28,7 +28,7 @@ func (s Store) Create(ctx context.Context, nu NewUser, now time.Time) (*User, er
 	}
 
 	usr := User{
-		Name: nu.Name,
+		Name:  nu.Name,
 		Email: nu.Email,
 		Roles: nu.Roles,
 	}
@@ -74,6 +74,7 @@ func (s Store) Update(ctx context.Context, userID string, uu UpdateUser, now tim
 	return nil
 }
 
+// Delete deletes concrete user by given userID.
 func (s Store) Delete(ctx context.Context, userID string) error {
 	s.log.Infow("Deleting specific user")
 	return nil
