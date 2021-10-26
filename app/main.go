@@ -9,9 +9,7 @@ import (
 	"go.uber.org/zap"
 	"net/http"
 	"os"
-	"os/signal"
 	"runtime"
-	"syscall"
 	"time"
 )
 
@@ -91,7 +89,7 @@ func run(log *zap.SugaredLogger) error {
 	shutdown := make(chan os.Signal, 1)
 
 	// Signal to relay incoming signals
-	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
+	//signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
 	apiMuxConf := handlers.APIMuxConfig{
 		Shutdown: shutdown,
@@ -101,7 +99,7 @@ func run(log *zap.SugaredLogger) error {
 
 	// Construct a server to service the requests against the mux.
 	httpServer := http.Server{
-		Addr:    "localhost:3000",
+		Addr:    ":3000",
 		Handler: apiMux,
 	}
 

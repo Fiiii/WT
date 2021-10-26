@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// New return suggared logger in production state
+// New returns suggared logger in production state
 func New(service string) (*zap.SugaredLogger, error) {
 	// Init production level logger
 	config := zap.NewProductionConfig()
