@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"runtime"
+	"time"
+
 	"github.com/Fiiii/WT/app/services/handlers"
 	"github.com/Fiiii/WT/business/sys/storage/dynamodb"
 	"github.com/Fiiii/WT/foundation/logger"
 	"github.com/ardanlabs/conf/v2"
 	"go.uber.org/automaxprocs/maxprocs"
 	"go.uber.org/zap"
-	"net/http"
-	"os"
-	"runtime"
-	"time"
 )
 
 func main() {

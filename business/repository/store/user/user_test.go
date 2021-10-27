@@ -2,10 +2,11 @@ package user
 
 import (
 	"context"
-	"github.com/Fiiii/WT/foundation/logger"
-	"github.com/google/go-cmp/cmp"
 	"testing"
 	"time"
+
+	"github.com/Fiiii/WT/foundation/logger"
+	"github.com/google/go-cmp/cmp"
 )
 
 // Success and failure markers.

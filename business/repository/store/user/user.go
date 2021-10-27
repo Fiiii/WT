@@ -3,10 +3,10 @@ package user
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"time"
 
 	"github.com/Fiiii/WT/business/sys/validate"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

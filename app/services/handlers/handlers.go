@@ -1,13 +1,13 @@
 package handlers
 
 import (
+	"net/http"
+	"os"
+
 	"github.com/Fiiii/WT/app/services/handlers/v1/productsGrp"
 	"github.com/Fiiii/WT/app/services/handlers/v1/usersGrp"
 	"github.com/Fiiii/WT/business/core/product"
 	"github.com/Fiiii/WT/business/core/user"
-	"net/http"
-	"os"
-
 	"github.com/Fiiii/WT/foundation/web"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"

@@ -3,10 +3,11 @@ package product
 import (
 	"context"
 	"fmt"
-	"github.com/Fiiii/WT/business/repository/store/product"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"
 	"time"
+
+	"github.com/Fiiii/WT/business/repository/store/product"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 // Core manages the set of API's for product access.
