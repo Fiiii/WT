@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/Fiiii/WT/app/services/handlers"
+	"github.com/Fiiii/WT/business/sys/storage/dynamodb"
 	"github.com/Fiiii/WT/foundation/logger"
 	"github.com/ardanlabs/conf/v2"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -53,11 +54,26 @@ func run(log *zap.SugaredLogger) error {
 			IdleTimeout     time.Duration `conf:"default:120s"`
 			ShutdownTimeout time.Duration `conf:"default:20s"`
 		}
+		Database struct {
+			Project string `conf:"default:WT"`
+			Stage   string `conf:"dev"`
+			Region  string `conf:"eu-central-1"`
+		}
 	}{
 		Version: conf.Version{
 			Build: "dev",
 			Desc:  "",
 		},
+	}
+
+	// =========================================================================
+	// Database Support
+
+	// Create connectivity to the database.
+	log.Infow("startup", "status", "initializing database support", "host")
+	db, err := dynamodb.NewClient(cfg.Database.Project, cfg.Database.Stage, cfg.Database.Region)
+	if err != nil {
+		return fmt.Errorf("connecting to db: %w", err)
 	}
 
 	// =========================================================================
@@ -93,6 +109,8 @@ func run(log *zap.SugaredLogger) error {
 
 	apiMuxConf := handlers.APIMuxConfig{
 		Shutdown: shutdown,
+		Log:      log,
+		DB:       db.Client,
 	}
 
 	apiMux := handlers.APIMux(apiMuxConf)

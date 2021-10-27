@@ -3,6 +3,8 @@ package handlers
 import (
 	calculatorapi "github.com/Fiiii/WT/app/services/handlers/calculator-api"
 	"github.com/Fiiii/WT/foundation/web"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"go.uber.org/zap"
 	"net/http"
 	"os"
 )
@@ -10,6 +12,8 @@ import (
 // APIMuxConfig contains all the mandatory systems required by handlers.
 type APIMuxConfig struct {
 	Shutdown chan os.Signal
+	Log      *zap.SugaredLogger
+	DB       *dynamodb.Client
 }
 
 // APIMux constructs a http.Handler with all application routes defined.
