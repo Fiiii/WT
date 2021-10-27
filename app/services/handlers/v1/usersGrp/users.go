@@ -1,13 +1,13 @@
-package users_api
+package usersGrp
 
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	userCore "github.com/Fiiii/WT/business/core/user"
 	"github.com/Fiiii/WT/business/repository/store/user"
 	"github.com/Fiiii/WT/foundation/web"
-	"net/http"
 )
 
 type Handlers struct {
