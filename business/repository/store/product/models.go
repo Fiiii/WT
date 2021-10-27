@@ -1,11 +1,15 @@
 package product
 
+import "time"
+
 // Product represents an individual product.
 type Product struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Cost     int    `json:"cost"`
-	Quantity int    `json:"quantity"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Cost        int       `json:"cost"`
+	Quantity    int       `json:"quantity"`
+	DateCreated time.Time `json:"date_created"`
+	DateUpdated time.Time `json:"date_updated"`
 }
 
 // NewProduct is what we require from clients when adding a Product.

@@ -20,7 +20,7 @@ func TestUser(t *testing.T) {
 		t.Fatalf("creating logger error")
 
 	}
-	store := NewStore(log)
+	store := NewStore(log, nil)
 
 	t.Log("Given the need to work with User records.")
 	{
