@@ -16,8 +16,9 @@ type client struct {
 }
 
 // NewClient returns client with dynamodb client integrated with config.
-func NewClient(project, stage, region string) (*client, error) {
-	defaultLocalCfg, err := config.LoadDefaultConfig(context.TODO())
+func NewClient(project, stage, region, profile string) (*client, error) {
+	defaultLocalCfg, err := config.LoadDefaultConfig(context.Background(),
+		config.WithSharedConfigProfile(profile))
 	if err != nil {
 		return nil, err
 	}

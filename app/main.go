@@ -55,6 +55,7 @@ func run(log *zap.SugaredLogger) error {
 			ShutdownTimeout time.Duration `conf:"default:20s"`
 		}
 		Database struct {
+			Profile string `conf:"dev-profile"`
 			Project string `conf:"default:WT"`
 			Stage   string `conf:"dev"`
 			Region  string `conf:"eu-central-1"`
@@ -70,8 +71,13 @@ func run(log *zap.SugaredLogger) error {
 	// Database Support
 
 	// Create connectivity to the database.
-	log.Infow("startup", "status", "initializing database support", "host")
-	db, err := dynamodb.NewClient(cfg.Database.Project, cfg.Database.Stage, cfg.Database.Region)
+	log.Infow("startup", "status", "initializing database support")
+	db, err := dynamodb.NewClient(
+		cfg.Database.Project,
+		cfg.Database.Stage,
+		cfg.Database.Region,
+		cfg.Database.Profile,
+	)
 	if err != nil {
 		return fmt.Errorf("connecting to db: %w", err)
 	}

@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"time"
 
 	"github.com/Fiiii/WT/business/sys/validate"
@@ -13,12 +14,14 @@ import (
 // Store manages the set of data layer access.
 type Store struct {
 	log *zap.SugaredLogger
+	db  *dynamodb.Client
 }
 
 // NewStore constructs new user Store.
-func NewStore(log *zap.SugaredLogger) Store {
+func NewStore(log *zap.SugaredLogger, db *dynamodb.Client) Store {
 	return Store{
 		log: log,
+		db:  db,
 	}
 }
 
@@ -52,6 +55,11 @@ func (s Store) Query(ctx context.Context, userID string) (*User, error) {
 func (s Store) List(ctx context.Context) ([]*User, error) {
 	var users []*User
 	s.log.Infow("Querying for all users")
+
+	users = append(users, &User{
+		Name: "Testing Fii",
+	})
+
 	return users, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Fiiii/WT/business/repository/store/user"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"
 	"time"
 )
@@ -14,9 +15,9 @@ type Core struct {
 }
 
 //NewCore constructs a core for user api access.
-func NewCore(log *zap.SugaredLogger) Core {
+func NewCore(log *zap.SugaredLogger, db *dynamodb.Client) Core {
 	return Core{
-		userStore: user.NewStore(log),
+		userStore: user.NewStore(log, db),
 	}
 }
 

@@ -53,7 +53,7 @@ func (a *App) Handle(method, group, path string, handler Handler) {
 
 	// Creates end path based on provided group
 	finalPath := path
-	if group == "" {
+	if group != "" {
 		finalPath = fmt.Sprintf("/%s%s", group, path)
 	}
 
