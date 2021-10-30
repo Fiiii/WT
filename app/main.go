@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -153,8 +154,23 @@ func run(log *zap.SugaredLogger) error {
 	// Shutdown
 
 	// Blocking main and waiting for shutdown.
-	if err := <-serverErrors; err != nil {
+	select {
+	case err := <-serverErrors:
 		return fmt.Errorf("server error: %w", err)
+
+	case sig := <-shutdown:
+		log.Infow("shutdown", "status", "shutdown started", "signal", sig)
+		defer log.Infow("shutdown", "status", "shutdown complete", "signal", sig)
+
+		// Give outstanding requests a deadline for completion.
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
+		defer cancel()
+
+		// Asking listener to shutdown and shed load.
+		if err := httpServer.Shutdown(ctx); err != nil {
+			httpServer.Close()
+			return fmt.Errorf("could not stop server gracefully: %w", err)
+		}
 	}
 
 	return nil
