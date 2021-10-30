@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,8 +16,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func main() {
+// build is the git version of this program. It is set using build flags in the makefile.
+var build = "develop"
 
+func main() {
 	// Construct the application logger.
 	log, err := logger.New("WT-API")
 	if err != nil {
@@ -68,6 +71,16 @@ func run(log *zap.SugaredLogger) error {
 		},
 	}
 
+	const prefix = "WT"
+	help, err := conf.Parse(prefix, &cfg)
+	if err != nil {
+		if errors.Is(err, conf.ErrHelpWanted) {
+			fmt.Println(help)
+			return nil
+		}
+		return fmt.Errorf("parsing config: %w", err)
+	}
+
 	// =========================================================================
 	// Database Support
 
@@ -92,15 +105,15 @@ func run(log *zap.SugaredLogger) error {
 	// related endpoints. This include the standard library endpoints.
 
 	// Construct the mux for the debug calls.
-	//debugMux := handlers.DebugMux(build, log, db)
+	debugMux := handlers.DebugMux(build, log, db.Client)
 
 	// Start the service listening for debug requests.
 	// Not concerned with shutting this down with load shedding.
-	//go func() {
-	//	if err := http.ListenAndServe(cfg.Web.DebugHost, debugMux); err != nil {
-	//		log.Errorw("shutdown", "status", "debug router closed", "host", cfg.Web.DebugHost, "ERROR", err)
-	//	}
-	//}()
+	go func() {
+		if err := http.ListenAndServe(cfg.Web.DebugHost, debugMux); err != nil {
+			log.Errorw("shutdown", "status", "debug router closed", "host", cfg.Web.DebugHost, "ERROR", err)
+		}
+	}()
 
 	// =========================================================================
 	// Start API Service
