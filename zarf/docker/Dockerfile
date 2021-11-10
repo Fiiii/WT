@@ -12,4 +12,4 @@ ARG BUILD_DATE
 ARG BUILD_REF
 COPY --from=build_wt /service/app/app /service/app
 WORKDIR /service
-CMD ["./service"]
+CMD ["./app"]
