@@ -28,7 +28,7 @@ func NewApp(shutdown chan os.Signal) *App {
 	}
 }
 
-// SignalShutdown is used to gracefully shutdown the app when an integrity
+// SignalShutdown is used to gracefully shut down the app when an integrity
 // issue is identified.
 func (a *App) SignalShutdown() {
 	a.shutdown <- syscall.SIGTERM

@@ -2,9 +2,15 @@ FROM golang:1.17 as build_wt
 ENV CGO_ENABLED 0
 ARG BUILD_REF
 
+#RUN mkdir /service
+#COPY go.* /service/
+#WORKDIR /service
+#RUN go mod download
+
 COPY . /service
 
 WORKDIR /service/app
+
 RUN go build -ldflags "-X main.build=${BUILD_REF}"
 
 FROM alpine:3.14
