@@ -6,9 +6,9 @@ import (
 	"net/http/pprof"
 	"os"
 
-	"github.com/Fiiii/WT/app/services/handlers/debug/checkgrp"
-	"github.com/Fiiii/WT/app/services/handlers/v1/productsGrp"
-	"github.com/Fiiii/WT/app/services/handlers/v1/usersGrp"
+	"github.com/Fiiii/WT/app/services/wt-api/handlers/debug/checkgrp"
+	"github.com/Fiiii/WT/app/services/wt-api/handlers/v1/productsGrp"
+	"github.com/Fiiii/WT/app/services/wt-api/handlers/v1/usersGrp"
 	"github.com/Fiiii/WT/business/core/product"
 	"github.com/Fiiii/WT/business/core/user"
 	"github.com/Fiiii/WT/foundation/web"

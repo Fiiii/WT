@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/Fiiii/WT/app/services/handlers"
+	"github.com/Fiiii/WT/app/services/wt-api/handlers"
 	"github.com/Fiiii/WT/business/sys/storage/dynamodb"
 	"github.com/Fiiii/WT/foundation/logger"
 	"github.com/ardanlabs/conf/v2"
