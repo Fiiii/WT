@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-pod
-  namespace: service-system
+  name: wt-pod
+  namespace: wt-system
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: service
+      app: wt
   template:
     metadata:
       labels:
-        app: service
+        app: wt
     spec:
       containers:
         # sales-api container configuration
-        - name: service-api
+        - name: wt-api
           resources:
             limits:
               cpu: "2000m" # Up to 2 full cores

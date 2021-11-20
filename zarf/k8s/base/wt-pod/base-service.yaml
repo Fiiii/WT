@@ -1,42 +1,42 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: service-system
+  name: wt-system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-pod # Base POD name
-  namespace: service-system
+  name: wt-pod # Base POD name
+  namespace: wt-system
 spec:
   selector:
     matchLabels:
-      app: service # Selector for POD name search.
+      app: wt # Selector for POD name search.
   template:
     metadata:
       labels:
-        app: service
+        app: wt
     spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       terminationGracePeriodSeconds: 60
       containers:
-        - name: service-api
-          image: service-amd64:1.0
+        - name: wt-api
+          image: wt-api-image
           ports:
-            - name: service-api
+            - name: wt-api
               containerPort: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: service-system
-  namespace: service-system
+  name: wt-system
+  namespace: wt-system
 spec:
   type: ClusterIP
   selector:
-    app: service
+    app: wt
   ports:
-    - name: service-api
+    - name: wt-api
       port: 3000
-      targetPort: service-api
+      targetPort: wt-api

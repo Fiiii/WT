@@ -2,20 +2,16 @@ FROM golang:1.17 as build_wt
 ENV CGO_ENABLED 0
 ARG BUILD_REF
 
-#RUN mkdir /service
-#COPY go.* /service/
-#WORKDIR /service
-#RUN go mod download
-
 COPY . /service
 
-WORKDIR /service/app
+WORKDIR /service/app/services/wt-api
 
 RUN go build -ldflags "-X main.build=${BUILD_REF}"
 
 FROM alpine:3.14
 ARG BUILD_DATE
 ARG BUILD_REF
-COPY --from=build_wt /service/app/app /service/app
+COPY --from=build_wt /service/app/services/wt-api/wt-api /service/wt-api
 WORKDIR /service
-CMD ["./app"]
+CMD ["./wt-api"]
+

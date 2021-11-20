@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+run:
+	go run app/services/wt-api/main.go --help | go run app/tooling/logfmt/main.go
+
 tidy:
 	go mod tidy
 	go mod vendor
@@ -17,7 +20,7 @@ all: service
 service:
 	docker build \
 		-f zarf/docker/Dockerfile \
-		-t service-amd64:$(VERSION) \
+		-t wt-api-amd64:$(VERSION) \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 		.
@@ -32,21 +35,22 @@ kind-up:
 		--image kindest/node:v1.21.1@sha256:69860bda5563ac81e3c0057d654b5253219618a22ec3a346306239bba8cfa1a6 \
 		--name $(KIND_CLUSTER) \
 		--config zarf/k8s/kind/kind-config.yaml
-	kubectl config set-context --current --namespace=service-system
+	kubectl config set-context --current --namespace=wt-system
 
 kind-down:
 	kind delete cluster --name $(KIND_CLUSTER)
 
 kind-load:
-	kind load docker-image service-amd64:$(VERSION) --name $(KIND_CLUSTER)
+	cd zarf/k8s/kind/wt-pod; kustomize edit set image wt-api-image=wt-api-amd64:$(VERSION)
+	kind load docker-image wt-api-amd64:$(VERSION) --name $(KIND_CLUSTER)
 
 kind-apply:
-	kustomize build zarf/k8s/kind/service-pod | kubectl apply -f -
+	kustomize build zarf/k8s/kind/wt-pod | kubectl apply -f -
 
 kind-update-apply: all kind-load kind-apply
 
 kind-restart:
-	kubectl rollout restart deployment service-pod
+	kubectl rollout restart deployment wt-pod
 
 kind-status:
 	kubectl get nodes -o wide
@@ -54,14 +58,14 @@ kind-status:
 	kubectl get pods -o wide --watch --all-namespaces
 
 kind-logs:
-	kubectl logs -l app=service --all-containers=true -f --tail=100 --namespace=service-system
+	kubectl logs -l app=wt --all-containers=true -f --tail=100 --namespace=wt-system | go run app/tooling/logfmt/main.go
 
 kind-status-service:
-	kubectl get pods -o wide --watch --namespace=service-system
+	kubectl get pods -o wide --watch --namespace=wt-system
 
 kind-describe:
 	kubectl describe nodes
 	kubectl describe svc
-	kubectl describe pod -l app=sales
+	kubectl describe pod -l app=wt
 
 kind-update: all kind-load kind-restart

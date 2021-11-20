@@ -30,6 +30,7 @@ func main() {
 	defer log.Sync()
 
 	if err := run(log); err != nil {
+		log.Errorw("startup", "ERROR", err)
 		os.Exit(1)
 	}
 }
@@ -47,7 +48,7 @@ func run(log *zap.SugaredLogger) error {
 	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// =========================================================================
-	// Configuration
+	// Configuration | options: ie. mask, noprint
 
 	cfg := struct {
 		conf.Version
@@ -57,13 +58,13 @@ func run(log *zap.SugaredLogger) error {
 			ReadTimeout     time.Duration `conf:"default:5s"`
 			WriteTimeout    time.Duration `conf:"default:10s"`
 			IdleTimeout     time.Duration `conf:"default:120s"`
-			ShutdownTimeout time.Duration `conf:"default:20s"`
+			ShutdownTimeout time.Duration `conf:"default:20s,mask"`
 		}
 		Database struct {
-			Profile string `conf:"dev-profile"`
+			Profile string `conf:"default:dev-profile"`
 			Project string `conf:"default:WT"`
-			Stage   string `conf:"dev"`
-			Region  string `conf:"eu-central-1"`
+			Stage   string `conf:"default:dev"`
+			Region  string `conf:"default:eu-central-1"`
 		}
 	}{
 		Version: conf.Version{
@@ -81,6 +82,13 @@ func run(log *zap.SugaredLogger) error {
 		}
 		return fmt.Errorf("parsing config: %w", err)
 	}
+
+	strConf, err := conf.String(&cfg)
+	if err != nil {
+		return fmt.Errorf("config string error: %w", err)
+	}
+
+	log.Infow("startup", "config", strConf)
 
 	// =========================================================================
 	// Database Support
