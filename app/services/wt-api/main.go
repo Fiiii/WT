@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"expvar"
 	"fmt"
 	"net/http"
 	"os"
@@ -83,12 +84,19 @@ func run(log *zap.SugaredLogger) error {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
+	// =========================================================================
+	// App Starting
+
+	log.Infow("starting service", "version", build)
+	defer log.Infow("shutdown complete")
+
 	strConf, err := conf.String(&cfg)
 	if err != nil {
 		return fmt.Errorf("config string error: %w", err)
 	}
 
 	log.Infow("startup", "config", strConf)
+	expvar.NewString("build").Set(build)
 
 	// =========================================================================
 	// Database Support
@@ -174,7 +182,7 @@ func run(log *zap.SugaredLogger) error {
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
 		defer cancel()
 
-		// Asking listener to shutdown and shed load.
+		// Asking listener to shut down and shed load.
 		if err := httpServer.Shutdown(ctx); err != nil {
 			httpServer.Close()
 			return fmt.Errorf("could not stop server gracefully: %w", err)

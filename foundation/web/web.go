@@ -15,16 +15,18 @@ type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) e
 
 // App is the entrypoint for the application.
 type App struct {
-	shutdown chan os.Signal
-	mux      *httptreemux.ContextMux
+	shutdown   chan os.Signal
+	ContextMux *httptreemux.ContextMux
+	mw         []Middleware
 }
 
 // NewApp created new application instance.
-func NewApp(shutdown chan os.Signal) *App {
+func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
 	mux := httptreemux.NewContextMux()
 	return &App{
-		shutdown: shutdown,
-		mux:      mux,
+		shutdown:   shutdown,
+		ContextMux: mux,
+		mw:         mw,
 	}
 }
 
@@ -37,11 +39,19 @@ func (a *App) SignalShutdown() {
 // ServeHTTP implements the http.Handler interface. In the future it will be used as
 // entrypoint with core for telemetry metrics.
 func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	a.mux.ServeHTTP(w, r)
+	a.ContextMux.ServeHTTP(w, r)
 }
 
 // Handle sets a handler function for a given HTTP method, path with wrapping by middleware (TODO)
-func (a *App) Handle(method, group, path string, handler Handler) {
+func (a *App) Handle(method, group, path string, handler Handler, mw ...Middleware) {
+
+	// First wrap handler specific middleware.
+	handler = wrapMiddleware(mw, handler)
+
+	// Secondly wrap by application's general middleware.
+	handler = wrapMiddleware(a.mw, handler)
+
+	// The function to execute for each request.
 	h := func(w http.ResponseWriter, r *http.Request) {
 		// Pull the context
 		ctx := r.Context()
@@ -58,5 +68,5 @@ func (a *App) Handle(method, group, path string, handler Handler) {
 	}
 
 	// Final handle by using httptreemux
-	a.mux.Handle(method, finalPath, h)
+	a.ContextMux.Handle(method, finalPath, h)
 }

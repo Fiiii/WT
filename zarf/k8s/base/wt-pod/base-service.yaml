@@ -26,6 +26,43 @@ spec:
           ports:
             - name: wt-api
               containerPort: 3000
+            - name: wt-api-debug
+              containerPort: 4000
+          readinessProbe:
+            httpGet:
+              port: 4000
+              path: debug/readiness
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              port: 4000
+              path: debug/liveness
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          env:
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_PODNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBERNETES_NAMESPACE_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_NODENAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
 ---
 apiVersion: v1
 kind: Service
@@ -40,3 +77,6 @@ spec:
     - name: wt-api
       port: 3000
       targetPort: wt-api
+    - name: wt-api-debug
+      port: 4000
+      targetPort: wt-api-debug
