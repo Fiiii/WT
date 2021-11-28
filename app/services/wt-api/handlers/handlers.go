@@ -11,6 +11,7 @@ import (
 	"github.com/Fiiii/WT/app/services/wt-api/handlers/v1/usersGrp"
 	"github.com/Fiiii/WT/business/core/product"
 	"github.com/Fiiii/WT/business/core/user"
+	"github.com/Fiiii/WT/business/middleware"
 	"github.com/Fiiii/WT/foundation/web"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"
@@ -25,7 +26,10 @@ type APIMuxConfig struct {
 
 // APIMux constructs a http.Handler with all application routes defined.
 func APIMux(cfg APIMuxConfig) http.Handler {
-	app := web.NewApp(cfg.Shutdown)
+	app := web.NewApp(
+		cfg.Shutdown,
+		middleware.Logger(cfg.Log),
+	)
 
 	// Load routes with previously initiated configuration.
 	v1(app, cfg)

@@ -42,7 +42,7 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	a.ContextMux.ServeHTTP(w, r)
 }
 
-// Handle sets a handler function for a given HTTP method, path with wrapping by middleware (TODO)
+// Handle sets a handler function for a given HTTP method, path with wrapping by middleware
 func (a *App) Handle(method, group, path string, handler Handler, mw ...Middleware) {
 
 	// First wrap handler specific middleware.

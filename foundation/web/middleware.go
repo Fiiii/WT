@@ -8,7 +8,7 @@ type Middleware func(Handler) Handler
 // handler. The middlewares' Handlers will be executed by requests in the order
 // they are provided.
 func wrapMiddleware(mw []Middleware, handler Handler) Handler {
-	for i := len(mw); i >= 0; i-- {
+	for i := len(mw) - 1; i >= 0; i-- {
 		h := mw[i]
 		if h != nil {
 			handler = h(handler)
