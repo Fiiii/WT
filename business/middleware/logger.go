@@ -10,7 +10,11 @@ import (
 
 // Logger - returns nested (onion) handler function by the middleware wrapper.
 func Logger (log *zap.SugaredLogger) web.Middleware {
+
+	// This is the actual middleware function to be executed.
 	m := func (handler web.Handler) web.Handler {
+
+		// Create the handler that will be attached in the middleware chain.
 		h := func (ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 
 			// If the context is missing this value, request the service

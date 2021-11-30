@@ -29,6 +29,7 @@ func APIMux(cfg APIMuxConfig) http.Handler {
 	app := web.NewApp(
 		cfg.Shutdown,
 		middleware.Logger(cfg.Log),
+		middleware.Errors(cfg.Log),
 	)
 
 	// Load routes with previously initiated configuration.
