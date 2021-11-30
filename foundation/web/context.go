@@ -14,6 +14,7 @@ const key ctxKey = 1
 
 // Values represents the values from the context.
 type Values struct {
+	TraceID    string
 	Now        time.Time
 	StatusCode int
 }

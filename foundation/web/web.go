@@ -3,9 +3,11 @@ package web
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
 	"syscall"
+	"time"
 
 	"github.com/dimfeld/httptreemux/v5"
 )
@@ -55,6 +57,19 @@ func (a *App) Handle(method, group, path string, handler Handler, mw ...Middlewa
 	h := func(w http.ResponseWriter, r *http.Request) {
 		// Pull the context
 		ctx := r.Context()
+
+		// Capture the parent request span from the context.
+		//span := trace.SpanFromContext(ctx)
+
+		// Set the context with the required values to
+		// process the request.
+		v := Values{
+			TraceID: uuid.New().String(),
+			Now:     time.Now(),
+		}
+
+		ctx = context.WithValue(ctx, key, &v)
+
 		if err := handler(ctx, w, r); err != nil {
 			a.SignalShutdown()
 			return
