@@ -26,14 +26,20 @@ type APIMuxConfig struct {
 
 // APIMux constructs a http.Handler with all application routes defined.
 func APIMux(cfg APIMuxConfig) http.Handler {
+
+	// Construct the web.app with the appropriate config and middlewares.
+	// Middleware are executed in reverse order (Panic closest to handler execution - onion)
 	app := web.NewApp(
 		cfg.Shutdown,
 		middleware.Logger(cfg.Log),
 		middleware.Errors(cfg.Log),
+		middleware.Metrics(),
+		middleware.Panics(),
 	)
 
 	// Load routes with previously initiated configuration.
 	v1(app, cfg)
+
 	return app
 }
 

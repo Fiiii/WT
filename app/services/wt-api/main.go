@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/Fiiii/WT/app/services/wt-api/handlers"
-	"github.com/Fiiii/WT/business/sys/storage/dynamodb"
+	"github.com/Fiiii/WT/business/sys/database/dynamodb"
 	"github.com/Fiiii/WT/foundation/logger"
 	"github.com/ardanlabs/conf/v2"
 	"go.uber.org/automaxprocs/maxprocs"
