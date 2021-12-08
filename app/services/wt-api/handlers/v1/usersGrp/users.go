@@ -1,3 +1,4 @@
+// Package usersGrp - Package users group contains all user related handlers.
 package usersGrp
 
 import (

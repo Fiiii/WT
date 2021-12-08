@@ -4,10 +4,10 @@ package product
 import (
 	"context"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"time"
 
 	"github.com/Fiiii/WT/business/sys/validate"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -15,11 +15,11 @@ import (
 // Store manages the set of API's for product access.
 type Store struct {
 	log *zap.SugaredLogger
-	db  *dynamodb.Client
+	db  *sqlx.DB
 }
 
 // NewStore constructs a product store for api access.
-func NewStore(log *zap.SugaredLogger, db *dynamodb.Client) Store {
+func NewStore(log *zap.SugaredLogger, db *sqlx.DB) Store {
 	return Store{
 		log: log,
 		db:  db,

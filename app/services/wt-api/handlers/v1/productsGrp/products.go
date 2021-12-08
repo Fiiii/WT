@@ -1,3 +1,4 @@
+// Package productsGrp - Package products group contains all user related handlers.
 package productsGrp
 
 import (

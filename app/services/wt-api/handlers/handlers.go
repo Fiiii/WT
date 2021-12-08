@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"expvar"
+	"github.com/Fiiii/WT/business/sys/auth"
+	"github.com/jmoiron/sqlx"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -13,7 +15,6 @@ import (
 	"github.com/Fiiii/WT/business/core/user"
 	"github.com/Fiiii/WT/business/middleware"
 	"github.com/Fiiii/WT/foundation/web"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"
 )
 
@@ -21,7 +22,8 @@ import (
 type APIMuxConfig struct {
 	Shutdown chan os.Signal
 	Log      *zap.SugaredLogger
-	DB       *dynamodb.Client
+	DB       *sqlx.DB
+	Auth     *auth.Auth
 }
 
 // APIMux constructs a http.Handler with all application routes defined.
@@ -72,7 +74,7 @@ func v1(app *web.App, cfg APIMuxConfig) {
 // debug application routes for the service. This bypassing the use of the
 // DefaultServerMux. Using the DefaultServerMux would be a security risk since
 // a dependency could inject a handler into our service without us knowing it.
-func DebugMux(build string, log *zap.SugaredLogger, db *dynamodb.Client) http.Handler {
+func DebugMux(build string, log *zap.SugaredLogger, db *sqlx.DB) http.Handler {
 	mux := DebugStandardLibraryMux()
 
 	// Register debug check endpoints.
@@ -81,6 +83,7 @@ func DebugMux(build string, log *zap.SugaredLogger, db *dynamodb.Client) http.Ha
 		Log:   log,
 		DB:    db,
 	}
+
 	mux.HandleFunc("/debug/readiness", cgh.Readiness)
 	mux.HandleFunc("/debug/liveness", cgh.Liveness)
 

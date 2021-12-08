@@ -3,11 +3,11 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"time"
 
 	"github.com/Fiiii/WT/business/repository/store/user"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 // Core manages the set of API's for user access.
@@ -16,7 +16,7 @@ type Core struct {
 }
 
 //NewCore constructs a core for user api access.
-func NewCore(log *zap.SugaredLogger, db *dynamodb.Client) Core {
+func NewCore(log *zap.SugaredLogger, db *sqlx.DB) Core {
 	return Core{
 		userStore: user.NewStore(log, db),
 	}

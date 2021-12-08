@@ -3,11 +3,11 @@ package product
 import (
 	"context"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 	"time"
 
 	"github.com/Fiiii/WT/business/repository/store/product"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
 // Core manages the set of API's for product access.
@@ -15,14 +15,14 @@ type Core struct {
 	productStore product.Store
 }
 
-func NewCore(log *zap.SugaredLogger, db *dynamodb.Client) Core {
+func NewCore(log *zap.SugaredLogger, db *sqlx.DB) Core {
 	return Core{
 		productStore: product.NewStore(log, db),
 	}
 }
 
 // Create inserts a new product into the database.
-func (c Core) Create(ctx context.Context, np product.NewProduct, now time.Time) (*product.Product, error)  {
+func (c Core) Create(ctx context.Context, np product.NewProduct, now time.Time) (*product.Product, error) {
 	pd, err := c.productStore.Create(ctx, np, now)
 	if err != nil {
 		return &product.Product{}, fmt.Errorf("create: %w", err)
@@ -40,7 +40,7 @@ func (c Core) Update(ctx context.Context, productID string, uu product.UpdatePro
 }
 
 // Delete deletes a product from the database.
-func (c Core) Delete(ctx context.Context, productID string) error  {
+func (c Core) Delete(ctx context.Context, productID string) error {
 	if err := c.productStore.Delete(ctx, productID); err != nil {
 		return fmt.Errorf("delete: %w", err)
 	}
@@ -65,4 +65,3 @@ func (c Core) QueryByID(ctx context.Context, userID string) (*product.Product, e
 	}
 	return pd, nil
 }
-

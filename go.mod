@@ -14,6 +14,8 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/uuid v1.3.0
+	github.com/jmoiron/sqlx v1.3.4
+	github.com/lib/pq v1.10.4
 	github.com/pkg/errors v0.8.1
 	go.uber.org/automaxprocs v1.4.0
 	go.uber.org/zap v1.19.1

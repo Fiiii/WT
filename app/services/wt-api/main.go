@@ -5,13 +5,15 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
+	"github.com/Fiiii/WT/business/sys/database"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
 
 	"github.com/Fiiii/WT/app/services/wt-api/handlers"
-	"github.com/Fiiii/WT/business/sys/database/dynamodb"
+	"github.com/Fiiii/WT/business/sys/auth"
+	"github.com/Fiiii/WT/foundation/keystore"
 	"github.com/Fiiii/WT/foundation/logger"
 	"github.com/ardanlabs/conf/v2"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -61,6 +63,19 @@ func run(log *zap.SugaredLogger) error {
 			IdleTimeout     time.Duration `conf:"default:120s"`
 			ShutdownTimeout time.Duration `conf:"default:20s,mask"`
 		}
+		Auth struct {
+			KeysFolder string `conf:"default:zarf/keys/"`
+			ActiveKID  string `conf:"default:54bb2165-71e1-41a6-af3e-7da4a0e1e2c1"`
+		}
+		DB struct {
+			User         string `conf:"default:postgres"`
+			Password     string `conf:"default:postgres,mask"`
+			Host         string `conf:"default:localhost"`
+			Name         string `conf:"default:postgres"`
+			MaxIdleConns int    `conf:"default:0"`
+			MaxOpenConns int    `conf:"default:0"`
+			DisableTLS   bool   `conf:"default:true"`
+		}
 		Database struct {
 			Profile string `conf:"default:dev-profile"`
 			Project string `conf:"default:WT"`
@@ -99,19 +114,59 @@ func run(log *zap.SugaredLogger) error {
 	expvar.NewString("build").Set(build)
 
 	// =========================================================================
+	// Initialize authentication support
+
+	log.Infow("startup", "status", "initializing authentication support")
+
+	// Construct a key store based on the key files stored in
+	// the specified directory.
+	ks, err := keystore.NewFS(os.DirFS(cfg.Auth.KeysFolder))
+	if err != nil {
+		return fmt.Errorf("reading keys: %w", err)
+	}
+
+	auth, err := auth.New(cfg.Auth.ActiveKID, ks)
+	if err != nil {
+		return fmt.Errorf("constructing auth: %w", err)
+	}
+
+	// =========================================================================
 	// Database Support
 
-	// Create connectivity to the database.
-	log.Infow("startup", "status", "initializing database support")
-	db, err := dynamodb.NewClient(
-		cfg.Database.Project,
-		cfg.Database.Stage,
-		cfg.Database.Region,
-		cfg.Database.Profile,
-	)
+	// Create connectivity to the  dynamodb database.
+	//log.Infow("startup", "status", "initializing database support")
+	//db, err := dynamodb.NewClient(
+	//	cfg.Database.Project,
+	//	cfg.Database.Stage,
+	//	cfg.Database.Region,
+	//	cfg.Database.Profile,
+	//)
+	//if err != nil {
+	//	return fmt.Errorf("connecting to db: %w", err)
+	//}
+
+	// =========================================================================
+	// Database Support
+
+	// Create connectivity to the psql database.
+	log.Infow("startup", "status", "initializing database support", "host", cfg.DB.Host)
+
+	db, err := database.Open(database.Config{
+		User:         cfg.DB.User,
+		Password:     cfg.DB.Password,
+		Host:         cfg.DB.Host,
+		Name:         cfg.DB.Name,
+		MaxIdleConns: cfg.DB.MaxIdleConns,
+		MaxOpenConns: cfg.DB.MaxOpenConns,
+		DisableTLS:   cfg.DB.DisableTLS,
+	})
 	if err != nil {
 		return fmt.Errorf("connecting to db: %w", err)
 	}
+	defer func() {
+		log.Infow("shutdown", "status", "stopping database support", "host", cfg.DB.Host)
+		db.Close()
+	}()
 
 	// =========================================================================
 	// Start Debug Service
@@ -122,7 +177,7 @@ func run(log *zap.SugaredLogger) error {
 	// related endpoints. This include the standard library endpoints.
 
 	// Construct the mux for the debug calls.
-	debugMux := handlers.DebugMux(build, log, db.Client)
+	debugMux := handlers.DebugMux(build, log, db)
 
 	// Start the service listening for debug requests.
 	// Not concerned with shutting this down with load shedding.
@@ -147,7 +202,8 @@ func run(log *zap.SugaredLogger) error {
 	apiMuxConf := handlers.APIMuxConfig{
 		Shutdown: shutdown,
 		Log:      log,
-		DB:       db.Client,
+		DB:       db,
+		Auth:     auth,
 	}
 
 	apiMux := handlers.APIMux(apiMuxConf)
