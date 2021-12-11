@@ -104,5 +104,8 @@ kind-update: all kind-load kind-restart
 # Running tests within the local computer
 
 test:
-	go test ./... -count=1
+	go test ./... -count=1 -cpuprofile cpu.prof -memprofile mem.prof -bench .
 	staticcheck -checks=all ./...
+
+tool:
+	go tool pprof cpu.out && rm cpu.out

@@ -20,6 +20,10 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       terminationGracePeriodSeconds: 60
+      initContainers:
+        - name: init-migrate
+          image: wt-api-image
+          command: [ './admin']
       containers:
         - name: wt-api
           image: wt-api-image

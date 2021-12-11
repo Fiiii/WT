@@ -1,5 +1,7 @@
 github.com/ardanlabs/conf/v2 v2.1.1 h1:QSsDPsGiRQ6o8iNrLoZFFoKbQcnBEEXKANVsri1bDEY=
 github.com/ardanlabs/conf/v2 v2.1.1/go.mod h1:m37ZKdW9jwMUEhGX36jRNt8VzSQ/HVmSziLZH2p33nY=
+github.com/ardanlabs/darwin v1.3.0 h1:ImREePBjivFWZ6PFA9o40yQHBhooClRCrHgQbduSQwk=
+github.com/ardanlabs/darwin v1.3.0/go.mod h1:Y3MRjtKnFnamCJ42PmZZPpojM7aDqlHVEHcs1TnHy3A=
 github.com/aws/aws-sdk-go-v2 v1.10.0 h1:+dCJ5W2HiZNa4UtaIc5ljKNulm0dK0vS5dxb5LdDOAA=
 github.com/aws/aws-sdk-go-v2 v1.10.0/go.mod h1:U/EyyVvKtzmFeQQcca7eBotKdlpcP2zzU6bXBYcf7CE=
 github.com/aws/aws-sdk-go-v2/config v1.9.0 h1:SkREVSwi+J8MSdjhJ96jijZm5ZDNleI0E4hHCNivh7s=

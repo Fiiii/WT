@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/ardanlabs/conf/v2 v2.1.1
+	github.com/ardanlabs/darwin v1.3.0
 	github.com/aws/aws-sdk-go-v2 v1.10.0
 	github.com/aws/aws-sdk-go-v2/config v1.9.0
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.6.0
