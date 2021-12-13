@@ -3,21 +3,35 @@ package usersGrp
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/Fiiii/WT/business/sys/auth"
+	weberrors "github.com/Fiiii/WT/business/web"
 	"net/http"
+	"strconv"
 
-	userCore "github.com/Fiiii/WT/business/core/user"
-	"github.com/Fiiii/WT/business/repository/store/user"
+	"github.com/Fiiii/WT/business/core/user"
 	"github.com/Fiiii/WT/foundation/web"
 )
 
 type Handlers struct {
-	User userCore.Core
+	User user.Core
 }
 
-// List returns a list of users with paging.
-func (h Handlers) List(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	users, err := h.User.List(ctx)
+// Query returns a list of users with paging.
+func (h Handlers) Query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	page := web.Param(r, "page")
+	pageNumber, err := strconv.Atoi(page)
+	if err != nil {
+		return weberrors.NewRequestError(fmt.Errorf("invalid page format [%s]", page), http.StatusBadRequest)
+	}
+	rows := web.Param(r, "rows")
+	rowsPerPage, err := strconv.Atoi(rows)
+	if err != nil {
+		return weberrors.NewRequestError(fmt.Errorf("invalid rows format [%s]", rows), http.StatusBadRequest)
+	}
+
+	users, err := h.User.Query(ctx, pageNumber, rowsPerPage)
 	if err != nil {
 		return fmt.Errorf("unable to query for users: %w", err)
 	}
@@ -78,9 +92,27 @@ func (h Handlers) Update(ctx context.Context, w http.ResponseWriter, r *http.Req
 
 // Delete removes a user from the system.
 func (h Handlers) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	id := web.Param(r, "id")
-	if err := h.User.Delete(ctx, id); err != nil {
-		return fmt.Errorf("ID[%s]: %w", id, err)
+	claims, err := auth.GetClaims(ctx)
+	if err != nil {
+		return weberrors.NewRequestError(auth.ErrForbidden, http.StatusForbidden)
+	}
+
+	userID := web.Param(r, "id")
+
+	// If you are not an admin and looking to delete someone other than yourself.
+	if !claims.Authorized(auth.RoleAdmin) && claims.Subject != userID {
+		return weberrors.NewRequestError(auth.ErrForbidden, http.StatusForbidden)
+	}
+
+	if err := h.User.Delete(ctx, userID); err != nil {
+		switch {
+		case errors.Is(err, user.ErrInvalidID):
+			return weberrors.NewRequestError(err, http.StatusBadRequest)
+		case errors.Is(err, user.ErrNotFound):
+			return weberrors.NewRequestError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("ID[%s]: %w", userID, err)
+		}
 	}
 
 	return web.Respond(ctx, w, nil, http.StatusNoContent)

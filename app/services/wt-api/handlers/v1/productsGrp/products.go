@@ -4,20 +4,32 @@ package productsGrp
 import (
 	"context"
 	"fmt"
+	"github.com/Fiiii/WT/business/core/product"
 	"net/http"
+	"strconv"
 
-	productCore "github.com/Fiiii/WT/business/core/product"
-	"github.com/Fiiii/WT/business/repository/store/product"
+	weberrors "github.com/Fiiii/WT/business/web"
 	"github.com/Fiiii/WT/foundation/web"
 )
 
 type Handlers struct {
-	Product productCore.Core
+	Product product.Core
 }
 
 // Query returns a list of products.
 func (h Handlers) Query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	products, err := h.Product.List(ctx)
+	page := web.Param(r, "page")
+	pageNumber, err := strconv.Atoi(page)
+	if err != nil {
+		return weberrors.NewRequestError(fmt.Errorf("invalid page format, page[%s]", page), http.StatusBadRequest)
+	}
+	rows := web.Param(r, "rows")
+	rowsPerPage, err := strconv.Atoi(rows)
+	if err != nil {
+		return weberrors.NewRequestError(fmt.Errorf("invalid rows format, rows[%s]", rows), http.StatusBadRequest)
+	}
+
+	products, err := h.Product.Query(ctx, pageNumber, rowsPerPage)
 	if err != nil {
 		return fmt.Errorf("unable to query for products: %w", err)
 	}

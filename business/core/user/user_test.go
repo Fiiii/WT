@@ -21,7 +21,7 @@ func TestUser(t *testing.T) {
 		t.Fatalf("creating logger error")
 
 	}
-	store := NewStore(log, nil)
+	store := NewCore(log, nil)
 
 	t.Log("Given the need to work with User records.")
 	{
@@ -43,7 +43,7 @@ func TestUser(t *testing.T) {
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to create user.", Success, testID)
 
-			saved, err := store.Query(ctx, user.ID)
+			saved, err := store.Query(ctx, user.ID, 1)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve user by ID: %s.", Failed, testID, err)
 			}

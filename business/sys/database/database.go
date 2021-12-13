@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/Fiiii/WT/foundation/web"
 	"go.uber.org/zap"
 	"net/url"
 	"reflect"
@@ -93,8 +94,8 @@ func StatusCheck(ctx context.Context, db *sqlx.DB) error {
 // NamedExecContext is a helper function to execute a CUD operation with
 // logging and tracing.
 func NamedExecContext(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtContext, query string, data interface{}) error {
-	//q := queryString(query, data)
-	//log.Infow("database.NamedExecContext", "traceid", web.GetTraceID(ctx), "query", q)
+	q := queryString(query, data)
+	log.Infow("database.NamedExecContext", "traceid", web.GetTraceID(ctx), "query", q)
 
 	if _, err := sqlx.NamedExecContext(ctx, db, query, data); err != nil {
 		return err
@@ -106,8 +107,8 @@ func NamedExecContext(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtCo
 // NamedQuerySlice is a helper function for executing queries that return a
 // collection of data to be unmarshalled into a slice.
 func NamedQuerySlice(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtContext, query string, data interface{}, dest interface{}) error {
-	//q := queryString(query, data)
-	//log.Infow("database.NamedQuerySlice", "traceid", web.GetTraceID(ctx), "query", q)
+	q := queryString(query, data)
+	log.Infow("database.NamedQuerySlice", "traceid", web.GetTraceID(ctx), "query", q)
 
 	val := reflect.ValueOf(dest)
 	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Slice {
@@ -135,8 +136,8 @@ func NamedQuerySlice(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtCon
 // NamedQueryStruct is a helper function for executing queries that return a
 // single value to be unmarshalled into a struct type.
 func NamedQueryStruct(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtContext, query string, data interface{}, dest interface{}) error {
-	//q := queryString(query, data)
-	//log.Infow("database.NamedQueryStruct", "traceid", web.GetTraceID(ctx), "query", q)
+	q := queryString(query, data)
+	log.Infow("database.NamedQueryStruct", "traceid", web.GetTraceID(ctx), "query", q)
 
 	rows, err := sqlx.NamedQueryContext(ctx, db, query, data)
 	if err != nil {
@@ -179,4 +180,53 @@ func queryString(query string, args ...interface{}) string {
 	query = strings.ReplaceAll(query, "\n", " ")
 
 	return strings.Trim(query, " ")
+}
+
+// Transactor interface needed to begin transaction.
+type Transactor interface {
+	Beginx() (*sqlx.Tx, error)
+}
+
+// WithinTran runs passed function and do commit/rollback at the end.
+func WithinTran(ctx context.Context, log *zap.SugaredLogger, db Transactor, fn func(sqlx.ExtContext) error) error {
+	traceID := web.GetTraceID(ctx)
+
+	// Begin the transaction.
+	log.Infow("begin tran", "traceid", traceID)
+	tx, err := db.Beginx()
+	if err != nil {
+		return fmt.Errorf("begin tran: %w", err)
+	}
+
+	// Mark to the defer function a rollback is required.
+	mustRollback := true
+
+	// Set up a defer function for rolling back the transaction. If
+	// mustRollback is true it means the call to fn failed, and we
+	// need to roll back the transaction.
+	defer func() {
+		if mustRollback {
+			log.Infow("rollback tran", "traceid", traceID)
+			if err := tx.Rollback(); err != nil {
+				log.Errorw("unable to rollback tran", "traceid", traceID, "ERROR", err)
+			}
+		}
+	}()
+
+	// Execute the code inside the transaction. If the function
+	// fails, return the error and the defer function will roll back.
+	if err := fn(tx); err != nil {
+		return fmt.Errorf("exec tran: %w", err)
+	}
+
+	// Disarm the deferred rollback.
+	mustRollback = false
+
+	// Commit the transaction.
+	log.Infow("commit tran", "traceid", traceID)
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit tran: %w", err)
+	}
+
+	return nil
 }

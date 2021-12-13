@@ -53,7 +53,7 @@ func v1(app *web.App, cfg APIMuxConfig) {
 	ugh := usersGrp.Handlers{
 		User: user.NewCore(cfg.Log, cfg.DB),
 	}
-	app.Handle(http.MethodGet, version, "/users", ugh.List)
+	app.Handle(http.MethodGet, version, "/users", ugh.Query)
 	app.Handle(http.MethodGet, version, "/users/:id", ugh.QueryByID)
 	app.Handle(http.MethodPost, version, "/users", ugh.Create)
 	app.Handle(http.MethodPut, version, "/users/:id", ugh.Update)

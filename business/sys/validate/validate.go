@@ -24,11 +24,14 @@ func init() {
 	validate = validator.New()
 
 	// Create a translator for english so the error messages are
-	// more human readable than technical.
+	// more human-readable than technical.
 	translator, _ = ut.New(en.New(), en.New()).GetTranslator("en")
 
 	// Register the english error messages for use.
-	en_translations.RegisterDefaultTranslations(validate, translator)
+	err := en_translations.RegisterDefaultTranslations(validate, translator)
+	if err != nil {
+		return
+	}
 
 	// Use JSON tag names for errors instead of Go struct names.
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
